@@ -58,7 +58,7 @@ class PDFKit
     append_stylesheets
 
     args = command(path)
-    invoke = args.join(' ')  + ' 2> pdfkit.log'
+    invoke = args.join(' ')  + " 2>> #{PDFKit.configuration.error_log_file}"
 
     result = IO.popen(invoke, "wb+") do |pdf|
       pdf.puts(@source.to_s) if @source.html?

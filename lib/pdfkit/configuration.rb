@@ -1,9 +1,10 @@
 class PDFKit
   class Configuration
-    attr_accessor :meta_tag_prefix, :default_options, :root_url
+    attr_accessor :meta_tag_prefix, :default_options, :root_url, :error_log_file
     attr_writer :wkhtmltopdf
 
     def initialize
+      @error_log_file = 'pdfkit_stderr.log'
       @meta_tag_prefix = 'pdfkit-'
       @default_options = {
         :disable_smart_shrinking => false,

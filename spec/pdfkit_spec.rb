@@ -212,7 +212,7 @@ describe PDFKit do
       pdf_data = pdfkit.to_pdf
       file = pdfkit.to_file(@file_path)
       file_data = open(@file_path, 'rb') {|io| io.read }
-      pdf_data.size.should == file_data.size
+      pdf_data.bytes.to_a.size.should == file_data.bytes.to_a.size
     end
   end
 

@@ -1,4 +1,5 @@
 class PDFKit
+  require 'tempfile'
 
   class NoExecutableError < StandardError
     def initialize
@@ -55,20 +56,34 @@ class PDFKit
   end
 
   def to_pdf(path=nil)
-    append_stylesheets
+    temp_pdf = nil
+    begin
+      if path.nil?
+        temp_pdf = Tempfile.new('pdfkit')
+        temp_pdf.close
+        path = temp_pdf.path
+      end
+      append_stylesheets
 
-    args = command(path)
-    invoke = args.join(' ')  + " 2>> #{PDFKit.configuration.error_log_file}"
+      args = command(path)
+      invoke = args.join(' ')  + " 2>> #{PDFKit.configuration.error_log_file}"
 
-    result = IO.popen(invoke, "wb+") do |pdf|
-      pdf.puts(@source.to_s) if @source.html?
-      pdf.close_write
-      pdf.gets(nil)
+      result = IO.popen(invoke, "wb+") do |pdf|
+        pdf.puts(@source.to_s) if @source.html?
+        pdf.close_write
+        pdf.gets(nil)
+      end
+
+      result = File.read(path) if path
+
+      raise "command failed: #{invoke}" if result.to_s.strip.empty?
+      return result
+    ensure
+      unless temp_pdf.nil?
+        temp_pdf.close
+        temp_pdf.unlink
+      end
     end
-    result = File.read(path) if path
-
-    raise "command failed: #{invoke}" if result.to_s.strip.empty?
-    return result
   end
 
   def to_file(path)
